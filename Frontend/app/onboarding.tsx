@@ -122,7 +122,7 @@ export default function OnboardingScreen() {
     <View style={styles.screen}>
       <ImageBackground
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        source={require("../assets/mckeldin.avif")}
+        source={require("./images/mckeldin.avif")}
         style={styles.hero}
         imageStyle={styles.heroImage}
       >
