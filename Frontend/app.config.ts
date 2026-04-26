@@ -9,7 +9,7 @@ const config: ExpoConfig = {
   version: "0.1.0",
   orientation: "portrait",
   userInterfaceStyle: "light",
-  backgroundColor: "#F0FAFA",
+  backgroundColor: "#F9F1EE",
   ios: {
     bundleIdentifier: "com.lend.app",
     supportsTablet: false

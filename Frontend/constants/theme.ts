@@ -1,21 +1,21 @@
 import type { Category } from "../types";
 
 export const colors = {
-  background: "#F0FAFA",
+  background: "#F9F1EE",
   surface: "#FFFFFF",
-  surfaceRaised: "#E4F5F5",
-  surfaceSoft: "#D4EEEE",
-  text: "#0D2626",
-  textMuted: "#32908F",
-  textDim: "#6AACAC",
-  border: "#B8DEDE",
-  accent: "#32908F",
-  accentSoft: "#D4EEEE",
-  blue: "#A3E7FC",
-  green: "#26C485",
-  greyDot: "#8ABDBD",
-  danger: "#C44870",
-  warning: "#D4813A"
+  surfaceRaised: "#F4E3E1",
+  surfaceSoft: "#FBE8E6",
+  text: "#111111",
+  textMuted: "#5F4A44",
+  textDim: "#9F7D75",
+  border: "#DDC2BF",
+  accent: "#B31B1B",
+  accentSoft: "#F6D3D2",
+  blue: "#4A4A4A",
+  green: "#FFC72C",
+  greyDot: "#A18F8C",
+  danger: "#8B1B1B",
+  warning: "#D79C2F"
 };
 
 export const spacing = {
@@ -43,8 +43,8 @@ export const font = {
 };
 
 export const categoryColors: Record<Category, string> = {
-  Tools: "#32908F",
-  Kitchen: "#A3E7FC",
-  Outdoor: "#26C485",
-  Misc: "#A37080"
+  Tools: "#B31B1B",
+  Kitchen: "#FFC72C",
+  Outdoor: "#4A4A4A",
+  Misc: "#7D675F"
 };

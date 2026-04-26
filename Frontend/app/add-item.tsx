@@ -1,5 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import * as Location from "expo-location";
 import { Camera, Image as ImageIcon } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -20,7 +21,8 @@ import { CategoryPill } from "../components/CategoryPill";
 import { Screen } from "../components/Screen";
 import { colors, font, radii } from "../constants/theme";
 import { apiBaseUrl, createItem } from "../lib/api";
-import { getSession } from "../lib/session";
+import { defaultLocation } from "../lib/location";
+import { getSession, updateSession } from "../lib/session";
 import type { Category } from "../types";
 
 const categories: Category[] = ["Tools", "Kitchen", "Outdoor", "Misc"];
@@ -64,6 +66,87 @@ export default function AddItemScreen() {
     }
   }
 
+  async function getLocationForSubmit(): Promise<{ lat: number; lng: number } | null> {
+    let session = await getSession();
+    let lat = session?.location?.latitude;
+    let lng = session?.location?.longitude;
+
+    if (lat && lng) {
+      return { lat, lng };
+    }
+
+    // On web, skip GPS and go directly to default location prompt
+    if (Platform.OS === "web") {
+      return new Promise((resolve) => {
+        Alert.alert(
+          "Use default location?",
+          "GPS is not available on web. Items will be listed in a default location. You can update it later from the home screen.",
+          [
+            {
+              text: "Use Default",
+              onPress: async () => {
+                await updateSession({ location: defaultLocation });
+                resolve({ lat: defaultLocation.latitude, lng: defaultLocation.longitude });
+              }
+            },
+            {
+              text: "Cancel",
+              onPress: () => resolve(null),
+              style: "cancel"
+            }
+          ]
+        );
+      });
+    }
+
+    // On native platforms, try to get actual location
+    let permission = await Location.getForegroundPermissionsAsync();
+    if (!permission.granted) {
+      permission = await Location.requestForegroundPermissionsAsync();
+    }
+
+    if (permission.granted) {
+      try {
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+          timeInterval: 5000,
+          mayShowUserSettingsDialog: true
+        });
+        const coords = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude
+        };
+        await updateSession({ location: coords });
+        return { lat: coords.latitude, lng: coords.longitude };
+      } catch (err) {
+        console.warn("Location error:", err);
+        // Fall through to default location prompt below
+      }
+    }
+
+    // Ask user if they want to use default location
+    return new Promise((resolve) => {
+      Alert.alert(
+        "Use default location?",
+        "GPS is unavailable. Items will be listed in a default location. You can update it later.",
+        [
+          {
+            text: "Use Default",
+            onPress: async () => {
+              await updateSession({ location: defaultLocation });
+              resolve({ lat: defaultLocation.latitude, lng: defaultLocation.longitude });
+            }
+          },
+          {
+            text: "Cancel",
+            onPress: () => resolve(null),
+            style: "cancel"
+          }
+        ]
+      );
+    });
+  }
+
   async function submit() {
     setError(null);
 
@@ -82,17 +165,21 @@ export default function AddItemScreen() {
 
     try {
       if (apiBaseUrl) {
-        const session = await getSession();
-        const lat = session?.location?.latitude;
-        const lng = session?.location?.longitude;
-
-        if (!lat || !lng) {
-          setError("Location unavailable. Return to home screen to refresh your location.");
+        const location = await getLocationForSubmit();
+        
+        if (!location) {
           setSubmitting(false);
           return;
         }
 
-        await createItem({ name: name.trim(), category, maxBorrowDays: maxDays, photoUri, lat, lng });
+        await createItem({
+          name: name.trim(),
+          category,
+          maxBorrowDays: maxDays,
+          photoUri,
+          lat: location.lat,
+          lng: location.lng
+        });
       }
 
       router.replace("/(tabs)/my-stuff");

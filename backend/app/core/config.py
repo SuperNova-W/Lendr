@@ -12,7 +12,7 @@ def _csv_values(*values: str | None) -> list[str]:
     parsed: list[str] = []
     for value in values:
         for item in (value or "").split(","):
-            item = item.strip()
+            item = item.strip().rstrip("/")
             if item and item not in seen:
                 seen.add(item)
                 parsed.append(item)
@@ -37,10 +37,15 @@ class Settings:
             os.getenv("EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID"),
         )
         self.secret_key = os.getenv("SECRET_KEY", "")
-        self.allowed_origins = [
-            origin.strip()
-            for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
-            if origin.strip()
+        self.allowed_origins = _csv_values(
+            os.getenv("ALLOWED_ORIGINS")
+        ) or [
+            "http://localhost:8081",
+            "http://127.0.0.1:8081",
+            "http://localhost:19006",
+            "http://127.0.0.1:19006",
+            "http://localhost:19000",
+            "http://127.0.0.1:19000"
         ]
         self.jwt_algorithm = "HS256"
         self.access_token_expire_minutes = 60 * 24 * 7
