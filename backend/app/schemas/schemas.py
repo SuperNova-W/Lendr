@@ -55,6 +55,7 @@ class ItemRead(BaseModel):
     photo_url: str | None
     available: bool
     max_days: int
+    distance_miles: float = 0.0
     created_at: datetime
     owner: OwnerInfo | None = None
 
@@ -87,6 +88,25 @@ class RequestRead(BaseModel):
     start_date: date
     end_date: date
     created_at: datetime
+
+
+class RequestDetail(RequestRead):
+    item_name: str = ""
+    item_photo_url: str | None = None
+    borrower_name: str = ""
+    owner_name: str = ""
+
+
+class UserProfileRead(BaseModel):
+    id: UUID
+    name: str
+    photo_url: str | None
+    radius_miles: float
+    rating: float
+    total_lends: int
+    created_at: datetime
+    listings: list[ItemRead]
+    incoming_requests: list["RequestDetail"]
 
 
 UserRead.model_rebuild()

@@ -28,16 +28,20 @@ async def get_nearby_items(
     db: AsyncSession = Depends(get_db),
 ) -> list[ItemRead]:
     radius_meters = radius * 1609.34
+    user_point = point_wkt(lat, lng)
+    dist_expr = (func.ST_Distance(Item.location, user_point, True) / 1609.34).label("distance_miles")
     query = (
-        select(Item)
+        select(Item, dist_expr)
         .options(selectinload(Item.owner))
         .where(Item.available.is_(True))
-        .where(func.ST_DWithin(Item.location, point_wkt(lat, lng), radius_meters))
-        .order_by(Item.created_at.desc())
+        .where(func.ST_DWithin(Item.location, user_point, radius_meters))
+        .order_by(dist_expr)
     )
     result = await db.execute(query)
-    items = result.scalars().all()
-    return [ItemRead.model_validate(item) for item in items]
+    items = []
+    for item, dist in result.all():
+        items.append(ItemRead.model_validate(item).model_copy(update={"distance_miles": dist or 0.0}))
+    return items
 
 
 @router.post("", response_model=ItemRead, status_code=status.HTTP_201_CREATED)

@@ -4,11 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.core.auth import get_current_user
 from app.core.database import get_db
-from app.models.models import Item, User
-from app.schemas.schemas import ItemRead, UserRead, UserUpdate
+from app.models.models import Item, Request, User
+from app.schemas.schemas import ItemRead, RequestDetail, RequestRead, UserProfileRead, UserRead, UserUpdate
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -34,6 +35,46 @@ async def update_me(
     await db.commit()
     await db.refresh(current_user)
     return UserRead.model_validate(current_user)
+
+
+@router.get("/me/profile", response_model=UserProfileRead)
+async def get_my_profile(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> UserProfileRead:
+    items_result = await db.execute(
+        select(Item).where(Item.owner_id == current_user.id).order_by(Item.created_at.desc())
+    )
+    items = items_result.scalars().all()
+    for item in items:
+        item.owner = current_user
+
+    BorrowerUser = aliased(User, name="borrower")
+    OwnerUser = aliased(User, name="owner_user")
+    reqs_result = await db.execute(
+        select(Request, Item, BorrowerUser, OwnerUser)
+        .join(Item, Request.item_id == Item.id)
+        .join(BorrowerUser, Request.borrower_id == BorrowerUser.id)
+        .join(OwnerUser, Request.owner_id == OwnerUser.id)
+        .where(Request.owner_id == current_user.id)
+        .order_by(Request.created_at.desc())
+    )
+    incoming: list[RequestDetail] = []
+    for req, item, borrower, owner in reqs_result.all():
+        base = RequestRead.model_validate(req).model_dump()
+        incoming.append(RequestDetail(**base, item_name=item.name, item_photo_url=item.photo_url, borrower_name=borrower.name, owner_name=owner.name))
+
+    return UserProfileRead(
+        id=current_user.id,
+        name=current_user.name,
+        photo_url=current_user.photo_url,
+        radius_miles=current_user.radius_miles,
+        rating=current_user.rating,
+        total_lends=current_user.total_lends,
+        created_at=current_user.created_at,
+        listings=[ItemRead.model_validate(item) for item in items],
+        incoming_requests=incoming,
+    )
 
 
 @router.get("/{user_id}/items", response_model=list[ItemRead])

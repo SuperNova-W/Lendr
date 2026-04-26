@@ -24,11 +24,17 @@ def create_access_token(user_id: UUID) -> str:
 
 
 def verify_google_token(token: str) -> dict:
+    if not settings.google_client_ids:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google auth is not configured",
+        )
+
     try:
         return id_token.verify_oauth2_token(
             token,
             google_requests.Request(),
-            settings.google_client_id,
+            settings.google_client_ids,
         )
     except ValueError as exc:
         raise HTTPException(
