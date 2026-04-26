@@ -24,13 +24,25 @@ export default function IndexRoute() {
           return;
         }
 
-        const currentUser = await getCurrentUser();
-        await saveSession({
-          ...session,
-          ...currentUser,
-          location: session?.location,
-          expoPushToken: session?.expoPushToken
-        });
+        // Try to fetch current user with a timeout
+        try {
+          const currentUserPromise = getCurrentUser();
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Request timeout")), 8000)
+          );
+          
+          const currentUser = await Promise.race([currentUserPromise, timeoutPromise]);
+          await saveSession({
+            ...session,
+            ...currentUser,
+            location: session?.location,
+            expoPushToken: session?.expoPushToken
+          });
+        } catch (err) {
+          // If user fetch fails, just continue with existing session
+          console.warn("Failed to refresh user:", err);
+        }
+        
         setTarget("/(tabs)");
       } catch {
         await clearSession();

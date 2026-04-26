@@ -9,7 +9,7 @@ import { Alert, ImageBackground, Platform, Pressable, StyleSheet, Text, View } f
 import { AppButton } from "../components/AppButton";
 import { colors, font, radii } from "../constants/theme";
 import { apiBaseUrl, googleSignIn, updateUserLocation } from "../lib/api";
-import { requestCurrentLocation } from "../lib/location";
+import { defaultLocation, requestCurrentLocation } from "../lib/location";
 import { registerForPushNotifications } from "../lib/notifications";
 import { saveSession } from "../lib/session";
 import type { RadiusMiles } from "../types";
@@ -65,14 +65,19 @@ export default function OnboardingScreen() {
 
   async function completeGoogleSignIn(idToken: string) {
     try {
-      const location = await requestCurrentLocation();
+      let location = null;
+
+      // Skip location request on web platform
+      if (Platform.OS !== "web") {
+        location = await requestCurrentLocation();
+      }
 
       const session = await googleSignIn(idToken);
 
       await saveSession({
         ...session,
         radiusMiles: radius,
-        location: location ?? undefined,
+        location: location ?? defaultLocation,
       });
 
       if (location) {

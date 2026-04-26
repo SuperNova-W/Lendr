@@ -166,24 +166,40 @@ export async function createItem(payload: {
   }
 
   const form = new FormData();
-  const fileName = payload.photoUri.split("/").pop() ?? "item.jpg";
-  const extension = fileName.split(".").pop() ?? "jpg";
-
+  
   form.append("name", payload.name);
   form.append("category", payload.category);
   form.append("max_days", String(payload.maxBorrowDays));
   form.append("lat", String(payload.lat));
   form.append("lng", String(payload.lng));
-  form.append("photo", {
-    uri: payload.photoUri,
-    name: fileName,
-    type: `image/${extension === "jpg" ? "jpeg" : extension}`
-  } as unknown as Blob);
+
+  // Handle photo for both web and native
+  if (payload.photoUri) {
+    const fileName = payload.photoUri.split("/").pop() ?? "item.jpg";
+    const extension = fileName.split(".").pop() ?? "jpg";
+    const mimeType = `image/${extension === "jpg" ? "jpeg" : extension}`;
+
+    // Fetch and convert URI to blob for web compatibility
+    try {
+      const response = await fetch(payload.photoUri);
+      if (!response.ok) throw new Error("Failed to load photo");
+      const blob = await response.blob();
+      form.append("photo", blob, fileName);
+    } catch (err) {
+      console.warn("Failed to fetch photo, attempting direct append:", err);
+      // Fallback for native: try to append directly
+      form.append("photo", {
+        uri: payload.photoUri,
+        name: fileName,
+        type: mimeType
+      } as unknown as Blob);
+    }
+  }
 
   const response = await client.post("/items", form, {
     headers: {
-      ...(await requiredAuthHeaders()),
-      "Content-Type": "multipart/form-data"
+      ...(await requiredAuthHeaders())
+      // Don't manually set Content-Type; axios + FormData will handle it
     }
   });
 
