@@ -1,3 +1,10 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+
 .env
 .env.*
 !.env.example
@@ -6,7 +13,6 @@ backend/.env
 backend/.env.*
 !backend/.env.example
 
-*.log
 backend/uvicorn.out.log
 backend/uvicorn.err.log
 
