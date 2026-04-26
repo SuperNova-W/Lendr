@@ -121,9 +121,8 @@ export default function OnboardingScreen() {
   return (
     <View style={styles.screen}>
       <ImageBackground
-        source={{
-          uri: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80"
-        }}
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        source={require("../assets/mckeldin.avif")}
         style={styles.hero}
         imageStyle={styles.heroImage}
       >
@@ -131,8 +130,8 @@ export default function OnboardingScreen() {
           <View style={styles.logo}>
             <Text style={styles.logoText}>L</Text>
           </View>
-          <Text style={styles.title}>Lend</Text>
-          <Text style={styles.subtitle}>Borrow useful things from neighbors nearby.</Text>
+          <Text style={styles.title}>Lendr</Text>
+          <Text style={styles.subtitle}>Borrow from fellow Terps in your neighborhood.</Text>
         </View>
       </ImageBackground>
 
@@ -183,8 +182,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(8,10,13,0.38)"
   },
   logo: {
-    width: 54,
-    height: 54,
+    width: 56,
+    height: 56,
     borderRadius: radii.md,
     backgroundColor: colors.accent,
     alignItems: "center",
@@ -192,17 +191,17 @@ const styles = StyleSheet.create({
     marginBottom: 18
   },
   logoText: {
-    color: colors.background,
+    color: colors.surface,
     fontFamily: font.extraBold,
-    fontSize: 28
+    fontSize: 26
   },
   title: {
-    color: colors.text,
+    color: "#FFFFFF",
     fontFamily: font.extraBold,
     fontSize: 48
   },
   subtitle: {
-    color: colors.textMuted,
+    color: "#FFFFFF",
     fontFamily: font.medium,
     fontSize: 18,
     marginTop: 8,
