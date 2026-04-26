@@ -14,7 +14,7 @@ import { colors, font } from "../constants/theme";
 import { configureNotifications } from "../lib/notifications";
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -23,10 +23,14 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    configureNotifications();
+    try {
+      configureNotifications();
+    } catch {
+      // expo-notifications is not supported on web
+    }
   }, []);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded && !fontError) {
     return <View style={styles.loading} />;
   }
 
