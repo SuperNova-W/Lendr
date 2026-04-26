@@ -32,6 +32,7 @@ export type LendItem = {
   distanceMiles: number;
   available: boolean;
   maxBorrowDays: number;
+  pricePerDay: number;
   owner: UserSummary;
   latitude?: number;
   longitude?: number;

@@ -58,14 +58,13 @@ export default function ItemDetailScreen() {
     );
   }
 
+  const durationDays = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)));
+  const totalCost = durationDays * (item.pricePerDay || 0);
+
   async function requestBorrow() {
     if (!item) {
       return;
     }
-
-    const durationDays = Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)
-    );
 
     if (durationDays < 1) {
       setError("Choose an end date after the start date.");
@@ -134,8 +133,16 @@ export default function ItemDetailScreen() {
           </Text>
 
           <View style={styles.infoPanel}>
-            <Text style={styles.infoLabel}>Borrow window</Text>
-            <Text style={styles.infoValue}>{item.lendWindowLabel ?? `${item.maxBorrowDays} days max`}</Text>
+            <View style={styles.infoRow}>
+              <View>
+                <Text style={styles.infoLabel}>Borrow window</Text>
+                <Text style={styles.infoValue}>{item.lendWindowLabel ?? `${item.maxBorrowDays} days max`}</Text>
+              </View>
+              <View style={styles.priceContainer}>
+                <Text style={styles.infoLabel}>Price</Text>
+                <Text style={styles.infoValue}>{item.pricePerDay > 0 ? `$${item.pricePerDay}/day` : "Free"}</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.dateRow}>
@@ -184,6 +191,11 @@ export default function ItemDetailScreen() {
           ) : null}
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Total Cost</Text>
+            <Text style={styles.totalValue}>{item.pricePerDay > 0 ? `$${totalCost}` : "Free"}</Text>
+          </View>
 
           <AppButton icon={Send} loading={submitting} disabled={!item.available} onPress={requestBorrow}>
             Request to Borrow
@@ -247,6 +259,32 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: font.bold,
     fontSize: 17
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  priceContainer: {
+    alignItems: "flex-end"
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderColor: colors.border
+  },
+  totalLabel: {
+    color: colors.text,
+    fontFamily: font.semibold,
+    fontSize: 18
+  },
+  totalValue: {
+    color: colors.text,
+    fontFamily: font.extraBold,
+    fontSize: 22
   },
   dateRow: {
     flexDirection: "row",

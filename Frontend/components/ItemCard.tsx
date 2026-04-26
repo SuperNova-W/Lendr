@@ -24,7 +24,12 @@ export function ItemCard({ item, onPress }: ItemCardProps) {
           <Text style={styles.name} numberOfLines={1}>
             {item.name}
           </Text>
-          <AvailabilityDot available={item.available} />
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>
+              {item.pricePerDay > 0 ? `$${item.pricePerDay}/day` : "Free"}
+            </Text>
+            <AvailabilityDot available={item.available} />
+          </View>
         </View>
         <Text style={styles.meta} numberOfLines={1}>
           {item.distanceMiles.toFixed(1)} mi away · {item.owner.firstName} ·{" "}
@@ -84,6 +89,16 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: font.bold,
     fontSize: 18
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8
+  },
+  price: {
+    color: colors.accent,
+    fontFamily: font.bold,
+    fontSize: 16
   },
   meta: {
     color: colors.textMuted,

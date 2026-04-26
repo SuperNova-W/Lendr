@@ -50,6 +50,7 @@ async def create_item(
     category: str = Form("misc"),
     description: str | None = Form(None),
     max_days: int = Form(7),
+    price_per_day: float = Form(0.0),
     lat: float = Form(...),
     lng: float = Form(...),
     photo: UploadFile | None = File(None),
@@ -64,6 +65,7 @@ async def create_item(
         description=description,
         photo_url=photo_url,
         max_days=max_days,
+        price_per_day=price_per_day,
         location=point_wkt(lat, lng),
     )
     db.add(item)

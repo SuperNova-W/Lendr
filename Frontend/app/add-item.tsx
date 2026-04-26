@@ -32,6 +32,7 @@ export default function AddItemScreen() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<Category>("Tools");
   const [maxBorrowDays, setMaxBorrowDays] = useState("3");
+  const [pricePerDay, setPricePerDay] = useState("0");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -161,6 +162,12 @@ export default function AddItemScreen() {
       return;
     }
 
+    const price = Number(pricePerDay);
+    if (!Number.isFinite(price) || price < 0) {
+      setError("Price per day must be a valid number.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -176,6 +183,7 @@ export default function AddItemScreen() {
           name: name.trim(),
           category,
           maxBorrowDays: maxDays,
+          pricePerDay: price,
           photoUri,
           lat: location.lat,
           lng: location.lng
@@ -246,6 +254,18 @@ export default function AddItemScreen() {
               onChangeText={setMaxBorrowDays}
               keyboardType="number-pad"
               placeholder="3"
+              placeholderTextColor={colors.textDim}
+              style={styles.input}
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Price per day ($)</Text>
+            <TextInput
+              value={pricePerDay}
+              onChangeText={setPricePerDay}
+              keyboardType="decimal-pad"
+              placeholder="0"
               placeholderTextColor={colors.textDim}
               style={styles.input}
             />

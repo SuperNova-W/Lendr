@@ -55,6 +55,7 @@ class ItemRead(BaseModel):
     photo_url: str | None
     available: bool
     max_days: int
+    price_per_day: float = 0.0
     distance_miles: float = 0.0
     created_at: datetime
     owner: OwnerInfo | None = None
@@ -64,6 +65,7 @@ class ItemUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
     max_days: int | None = Field(default=None, gt=0)
+    price_per_day: float | None = Field(default=None, ge=0.0)
     available: bool | None = None
 
 

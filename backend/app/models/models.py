@@ -50,6 +50,7 @@ class Item(Base):
     photo_url: Mapped[str | None] = mapped_column(String, nullable=True)
     available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
     max_days: Mapped[int] = mapped_column(Integer, nullable=False, default=7, server_default="7")
+    price_per_day: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0.0")
     location = mapped_column(
         Geography(geometry_type="POINT", srid=4326, spatial_index=False),
         nullable=False,

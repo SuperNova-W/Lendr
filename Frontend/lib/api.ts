@@ -74,6 +74,7 @@ export function normalizeItem(raw: any): LendItem {
     distanceMiles: Number(raw.distanceMiles ?? raw.distance_miles ?? raw.distance ?? 0),
     available: Boolean(raw.available ?? raw.is_available ?? true),
     maxBorrowDays: Number(raw.maxBorrowDays ?? raw.max_borrow_days ?? raw.max_days ?? 3),
+    pricePerDay: Number(raw.pricePerDay ?? raw.price_per_day ?? 0),
     owner: {
       id: String(owner.id ?? raw.owner_id ?? ""),
       firstName: String(owner.firstName ?? owner.first_name ?? owner.name ?? "Neighbor")
@@ -157,6 +158,7 @@ export async function createItem(payload: {
   name: string;
   category: Category;
   maxBorrowDays: number;
+  pricePerDay: number;
   photoUri: string;
   lat: number;
   lng: number;
@@ -170,6 +172,7 @@ export async function createItem(payload: {
   form.append("name", payload.name);
   form.append("category", payload.category);
   form.append("max_days", String(payload.maxBorrowDays));
+  form.append("price_per_day", String(payload.pricePerDay));
   form.append("lat", String(payload.lat));
   form.append("lng", String(payload.lng));
 
